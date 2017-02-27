@@ -48,16 +48,14 @@ class KtServerService(Job.Service):
         killSwitchFile.close()
 
 
-        self.process = runKtserver(self.dbElem, self.killSwitchPath, fileStore = job.fileStore)
+        self.process = runKtserver(job, self.dbElem, self.killSwitchPath, fileStore = job.fileStore)
         assert self.dbElem.getDbHost() != None
         
-        blockUntilKtserverIsRunning(self.dbElem, self.killSwitchPath, self.blockTimeout, self.blockTimestep)
+        #blockUntilKtserverIsRunning(job, self.dbElem, self.killSwitchPath, self.blockTimeout, self.blockTimestep)
         return self.dbElem.getConfString()
         
 
     def stop(self, job):
-        if self.process:
-            self.process.kill()
         logPath = getLogPath(self.dbElem)
         if os.path.exists(logPath):
             os.remove(logPath)

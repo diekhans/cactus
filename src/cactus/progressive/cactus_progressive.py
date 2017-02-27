@@ -339,7 +339,7 @@ def exportHal(job, project, event=None, cacheBytes=None, cacheMDC=None, cacheRDC
             if inMemory is True:
                 opts += " --inMemory"
 
-            cactus_call(parameters=["halAppendCactusSubtree"],
+            cactus_call(job, parameters=["halAppendCactusSubtree"],
                         option_string=opts)
 
     return job.fileStore.writeGlobalFile(HALPath)
