@@ -1,0 +1,50 @@
+import os
+from cgtscons import *
+
+# clone to avoid modifying parent enviroment
+Import("env",)
+env = env.Clone()
+
+libAddCactus(env)
+libAddSonLib(env)
+
+##
+# cactusLib
+##
+clPublicIncludeDirs = ("api/include",)
+clEnv = env.Clone()
+copyBuildInclude(clEnv, globInclude(clEnv, clPublicIncludeDirs))
+buildStaticLibrary(clEnv, CACTUS_LIB_NAME, 
+                   globSrcPaths(clEnv, "api/src", "*.c"))
+
+
+
+# ##
+# # sonlib tests
+# ##
+# slTestEnv = clEnv.Clone()
+# libAddSonLib(slTestEnv)
+# libAddCuTest(slTestEnv)
+# libAddKyotoDatabase(slTestEnv)
+
+# # these are compiled separately, exclude from glob of unit tests
+# nonUnitTests = ("kt_connect_test.cpp", "cigarsTest.c", "fastaCTest.c",
+#                 "kvDatabaseTest.c", "kvDatabaseTestCommon.c")
+# testSrcDir = "sonlib/tests"
+# linkTestProg(slTestEnv, "sonLib_Tests",
+#              globSrcPaths(slTestEnv, testSrcDir, "*.c", excludes=nonUnitTests))
+# linkTestProg(slTestEnv, "sonLib_cigarsTest",
+#              getSrcPaths(testSrcDir, ["cigarsTest.c"]))
+# linkTestProg(slTestEnv, "sonLib_fastaCTest",
+#              getSrcPaths(testSrcDir, ["fastaCTest.c"]))
+# linkTestProg(slTestEnv, "threeEdgeConnectedTests",
+#              globSrcPaths(slTestEnv, "threeEdgeConnected/tests", "*.c"))
+
+# # need special flags for anything including kyoto typhoon, etc headers
+# slKtTestEnv = slTestEnv.Clone()
+# slKtTestEnv.Append(CXXFLAGS=["-fpermissive", "-Wno-overflow", "-Wno-unused-but-set-variable",
+#                              "-Wno-conversion-null", "-Wno-narrowing"])
+# linkTestProg(slKtTestEnv, "sonLib_kt_connect_test",
+#              getSrcPaths(testSrcDir, ["kt_connect_test.cpp"]))
+# linkTestProg(slKtTestEnv, "sonLib_kvDatabaseTest",
+#              getSrcPaths(testSrcDir, ["kvDatabaseTest.c", "kvDatabaseTestCommon.c"]))
