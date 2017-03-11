@@ -13,7 +13,7 @@ libAddSonLib(env)
 ##
 clPublicIncludeDirs = ("api/include",)
 clEnv = env.Clone()
-copyBuildInclude(clEnv, globInclude(clEnv, clPublicIncludeDirs))
+installIncludes(clEnv, globInclude(clEnv, clPublicIncludeDirs))
 buildStaticLibrary(clEnv, CACTUS_LIB_NAME, 
                    globSrcPaths(clEnv, "api/src", "*.c"))
 
