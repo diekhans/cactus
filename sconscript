@@ -6,14 +6,14 @@ Import("env",)
 env = env.Clone()
 
 libAddCactus(env)
+libAddCPecan(env)
 libAddSonLib(env)
 
 ##
 # cactusLib
 ##
-clPublicIncludeDirs = ("api/include",)
 clEnv = env.Clone()
-installIncludes(clEnv, globInclude(clEnv, clPublicIncludeDirs))
+makeIncludesDepends(clEnv, globModIncludes(clEnv, "cactus", ["api/include"]))
 buildStaticLibrary(clEnv, CACTUS_LIB_NAME, 
                    globSrcPaths(clEnv, "api/src", "*.c"))
 
