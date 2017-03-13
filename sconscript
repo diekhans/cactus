@@ -8,18 +8,39 @@ env = env.Clone()
 libAddCactus(env)
 libAddCPecan(env)
 libAddSonLib(env)
+libAddKyotoDatabase(env)
 
 ##
 # cactusLib
 ##
-clEnv = env.Clone()
-makeIncludesDepends(clEnv, globModIncludes(clEnv, "cactus", ["api/include"]))
-buildStaticLibrary(clEnv, CACTUS_LIB_NAME, 
-                   globSrcPaths(clEnv, "api/src", "*.c"))
+env = env.Clone()
+buildStaticLibrary(env, CACTUS_LIB_NAME, 
+                   globSrcPaths(env, "api/src", "*.c"))
+
+##
+# blast
+##
+buildStaticLibrary(env, BLAST_LIB_NAME, 
+                   "blast/src/blastAlignmentLib.c")
+blastProgs = ["cactus_blast_chunkFlowerSequences",  "cactus_convertAlignmentsToInternalNames",
+              "cactus_blast_chunkSequences", "cactus_coverage",
+              "cactus_blast_convertCoordinates", "cactus_stripUniqueIDs",
+              "cactus_blast_sortAlignments"]
+for bl in blastProgs:
+    linkProg(env, bl, [os.path.join("blast/src", bl + ".c")])
+
 
 ##
 # bar
 ##
 linkProg(env, "cactus_bar", Glob("bar/src/*.c"))
+
+##
+# caf
+##
+buildStaticLibrary(env, STCAF_LIB_NAME, 
+                   globSrcPaths(env, "caf/src", "*.c", excludes=["cactus_bar.c"]))
+linkProg(env, "cactus_caf", ["caf/src/cactus_caf.c"])
+
 
 
