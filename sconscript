@@ -22,25 +22,68 @@ buildStaticLibrary(env, CACTUS_LIB_NAME,
 ##
 buildStaticLibrary(env, BLAST_LIB_NAME, 
                    "blast/src/blastAlignmentLib.c")
-blastProgs = ["cactus_blast_chunkFlowerSequences",  "cactus_convertAlignmentsToInternalNames",
+blastCProgs = ["cactus_blast_chunkFlowerSequences",  "cactus_convertAlignmentsToInternalNames",
               "cactus_blast_chunkSequences", "cactus_coverage",
               "cactus_blast_convertCoordinates", "cactus_stripUniqueIDs",
               "cactus_blast_sortAlignments"]
-for bl in blastProgs:
-    linkProg(env, bl, [os.path.join("blast/src", bl + ".c")])
+for b in blastProgs:
+    linkProg(env, b,
+             [os.path.join("blast/src", b + ".c")])
 
 
 ##
 # bar
 ##
-linkProg(env, "cactus_bar", Glob("bar/src/*.c"))
+linkProg(env, "cactus_bar",
+         Glob("bar/src/*.c"))
 
 ##
 # caf
 ##
 buildStaticLibrary(env, STCAF_LIB_NAME, 
-                   globSrcPaths(env, "caf/src", "*.c", excludes=["cactus_bar.c"]))
-linkProg(env, "cactus_caf", ["caf/src/cactus_caf.c"])
+                   globSrcPaths(env, "caf/src", "*.c",
+                                excludes=["cactus_caf.c"]))
+linkProg(env, "cactus_caf",
+         ["caf/src/cactus_caf.c"])
+
+##
+# check
+##
+linkProg(env, "cactus_check",
+         ["check/src/cactus_check.c"])
 
 
+##
+# FIXME: TODO
+# hal
+# normalisation
+# phylogeny
+##
 
+##
+# pipeline
+##
+pipelineProgs = ["cactus_workflow_getFlowers",
+                 "cactus_workflow_extendFlowers",
+                 "cactus_workflow_flowerStats",
+                 "cactus_workflow_convertAlignmentCoordinates",
+                 "cactus_secondaryDatabase"]
+for p in pipelineProgs:
+    linkProg(env, p, ["pipeline/src/{}.c".format(p)])
+
+##
+# preprocessor
+##
+cactus_analyseAssembly cactus_covered_intervals
+preprocessor/src/
+
+##
+# reference
+##
+reference/include/
+reference/src/
+
+##
+# setup
+##
+setup/src/
