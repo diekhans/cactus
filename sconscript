@@ -8,32 +8,64 @@ env = env.Clone()
 libAddCactus(env)
 libAddCPecan(env)
 libAddSonLib(env)
+libAddCuTest(env)
 libAddKyotoDatabase(env)
 
 ##
 # cactusLib
 ##
 env = env.Clone()
-buildStaticLibrary(env, CACTUS_LIB_NAME, 
-                   globSrcPaths(env, "api/src", "*.c"))
+buildStaticLibrary(env, CACTUS_LIB_NAME,
+                   getSrcPaths("api/src",
+                               ["cactusBlock.c", "cactusCap.c", "cactusChain.c",
+                                "cactusChainPromote.c", "cactusDisk.c", "cactusEnd.c", "cactusEvent.c",
+                                "cactusEventTree.c", "cactusFace.c", "cactusFaceEnd.c",
+                                "cactusFacesBuilding.c", "cactusFlower.c", "cactusFlowerWriter.c",
+                                "cactusGroup.c", "cactusLink.c", "cactusMetaSequence.c", "cactusMisc.c",
+                                "cactusSegment.c", "cactusSequence.c", "cactusSerialisation.c",
+                                "cactusTestCommon.c"]))
+atEnv = env.Clone()
+atEnv.AppendUnique(CPPPATH=["api/src"])
+linkTest(atEnv, "cactusAPITests",
+         getSrcPaths("api/tests",
+                     ["allTests.c", "cactusBlockTest.c", "cactusCapTest.c",
+                      "cactusChainTest.c", "cactusDiskTest.c", "cactusEndTest.c",
+                      "cactusEventTest.c", "cactusEventTreeTest.c",
+                      "cactusFaceEndTest.c", "cactusFaceTest.c", "cactusFlowerTest.c",
+                      "cactusFlowerWriterTest.c", "cactusGroupTest.c",
+                      "cactusLinkTest.c", "cactusMetaSequenceTest.c",
+                      "cactusMiscTest.c", "cactusSegmentTest.c",
+                      "cactusSequenceTest.c", "cactusSerialisationTest.c"]))
+# FIXME: allTests.py tests
 
 ##
 # blast
 ##
 buildStaticLibrary(env, BLAST_LIB_NAME, 
-                   "blast/src/blastAlignmentLib.c")
+                   ["blast/src/blastAlignmentLib.c"])
 blastCProgs = ["cactus_blast_chunkFlowerSequences",  "cactus_convertAlignmentsToInternalNames",
                "cactus_blast_chunkSequences", "cactus_coverage",
                "cactus_blast_convertCoordinates", "cactus_stripUniqueIDs",
                "cactus_blast_sortAlignments"]
 for b in blastCProgs:
-    linkProgDir(env, None, "blast/src", [b+ ".c"])
-
+    linkProg(env, None, getSrcPaths("blast/src", [b+ ".c"]))
+# FIXME: python tests
 
 ##
 # bar
+# barTests call bar/src function, however there is no bar library, so link in objects
 ##
-linkProg(env, "cactus_bar", Glob("bar/src/*.c"))
+barFuncSrcs = ["adjacencySequences.c", "endAligner.c",
+               "flowerAligner.c", "rescue.c"]
+linkProg(env, "cactus_bar", getSrcPaths("bar/src", ["cactus_bar.c"] + barFuncSrcs))
+barEnv = env.Clone()
+barEnv.AppendUnique(CPPPATH=["bar/src"])
+linkTest(barEnv, "cactus_barTests",
+         getSrcPaths("bar/tests",
+                     ["adjacencySequencesTest.c", "allTests.c", "endAlignerTest.c",
+                      "flowerAlignerTest.c", "rescueTest.c"])
+         + getCompiledObjs(env, "bar/src", barFuncSrcs))
+# FIXME: bar/tests/cactus_barTest.py
 
 ##
 # caf
@@ -41,12 +73,18 @@ linkProg(env, "cactus_bar", Glob("bar/src/*.c"))
 buildStaticLibrary(env, STCAF_LIB_NAME, 
                    globSrcPaths(env, "caf/src", "*.c",
                                 excludes=["cactus_caf.c"]))
-linkProgDir(env, None, "caf/src/", ["cactus_caf.c"])
+linkProg(env, None, ["caf/src/cactus_caf.c"])
+linkTest(env, "stCafTests",
+         getSrcPaths("caf/tests",
+                     ["allTests.c", "annealingTest.c", "filteringTest.c",
+                      "giantComponentTest.c", "phylogenyTests.c",
+                      "pinchIteratorTest.c", "recoverableChainsTest.c"]))
+# FIXME: caf/tests/allTests.py
 
 ##
 # check
 ##
-linkProgDir(env, None, "check/src", ["cactus_check.c"])
+linkProg(env, None, ["check/src/cactus_check.c"])
 
 
 ##
@@ -59,27 +97,55 @@ linkProgDir(env, None, "check/src", ["cactus_check.c"])
 ##
 # pipeline
 ##
-pipelineProgs = ["cactus_workflow_getFlowers",
-                 "cactus_workflow_extendFlowers",
-                 "cactus_workflow_flowerStats",
-                 "cactus_workflow_convertAlignmentCoordinates",
-                 "cactus_secondaryDatabase"]
-for p in pipelineProgs:
-    linkProgDir(env, None, "pipeline/src", [p + ".c"])
+pipelineCProgs = ["cactus_workflow_getFlowers",
+                  "cactus_workflow_extendFlowers",
+                  "cactus_workflow_flowerStats",
+                  "cactus_workflow_convertAlignmentCoordinates",
+                  "cactus_secondaryDatabase"]
+for p in pipelineCProgs:
+    linkProg(env, None, getSrcPaths("pipeline/src", [p + ".c"]))
+# FIXME: pipeline/tests/cactus_evolverTest.py  pipeline/tests/cactus_workflowTest.py
 
 ##
 # preprocessor
 ##
-#cactus_analyseAssembly cactus_covered_intervals
-#preprocessor/src/
+preprocessorCProgs = ["cactus_analyseAssembly", "cactus_batch_mergeChunks",
+                     "cactus_covered_intervals"]
+for p in preprocessorCProgs:
+    linkProg(env, None, getSrcPaths("preprocessor/src", [p + ".c"]))
+installPyProgs(env,
+               getSrcPaths("preprocessor/bin",
+                           ["cactus_checkUniqueHeaders.py",
+                            "cactus_fasta_fragments.py",
+                            "cactus_fasta_softmask_intervals.py",
+                            "cactus_filterSmallFastaSequences.py",
+                            "cactus_lastzRepeatMask.py",
+                            "cactus_makeAlphaNumericHeaders.py",
+                            "cactus_preprocessor.py"]))
+#  FIXME: preprocessor/tests/*.py
 
 ##
 # reference
 ##
-#reference/include/
-#reference/src/
+buildStaticLibrary(env, STREFERENCE_LIB_NAME,
+                   getSrcPaths("reference/src",
+                               ["addReferenceCoordinates.c",
+                                "blockMLString.c", "buildReference.c",
+                                "recursiveThreadBuilder.c"]))
+referenceCProgs = ["cactus_addReferenceCoordinates",
+                   "cactus_getReferenceSeq",
+                   "cactus_reference"]
+for p in referenceCProgs:
+    linkProg(env, None, getSrcPaths("reference/src", [p + ".c"]))
+linkTest(env, "referenceTests",
+         getSrcPaths("reference/tests",
+                     ["addReferenceCoordinatesTest.c", "allTests.c", "buildReferenceTest.c",
+                      "recursiveThreadBuilderTest.c"]))
 
+    
 ##
 # setup
 ##
-#setup/src/
+linkProg(env, None, ["setup/src/cactus_setup.c"])
+
+#FIXME: cactus_setupTest.py
