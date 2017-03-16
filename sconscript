@@ -84,7 +84,7 @@ linkTest(env, "stCafTests",
 ##
 # check
 ##
-linkProg(env, None, ["check/src/cactus_check.c"])
+linkProg(env, None, "check/src/cactus_check.c")
 
 
 ##
@@ -112,7 +112,7 @@ for p in pipelineCProgs:
 preprocessorCProgs = ["cactus_analyseAssembly", "cactus_batch_mergeChunks",
                      "cactus_covered_intervals"]
 for p in preprocessorCProgs:
-    linkProg(env, None, getSrcPaths("preprocessor/src", [p + ".c"]))
+    linkProg(env, None, getSrcPaths("preprocessor/src", p + ".c"))
 installPyProgs(env,
                getSrcPaths("preprocessor/bin",
                            ["cactus_checkUniqueHeaders.py",
@@ -146,6 +146,6 @@ linkTest(env, "referenceTests",
 ##
 # setup
 ##
-linkProg(env, None, ["setup/src/cactus_setup.c"])
+linkProg(env, None, "setup/src/cactus_setup.c")
 
 #FIXME: cactus_setupTest.py
